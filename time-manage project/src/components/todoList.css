@@ -1,0 +1,20 @@
+.todo_list {
+  width: 90%;
+  height: 31px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.65);
+}
+
+.check_box {
+  margin-right: 2%;
+}
+
+.list {
+  flex-grow: 1;
+}
+
+.edit_btn {
+  margin-left: 2%;
+}

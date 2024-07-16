@@ -1,5 +1,186 @@
-.box {
+.timer_page {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.timer_page_innerbox {
+  width: 1100px;
+  height: 700px;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  z-index: 1;
+}
+
+/* 타이머 박스 CSS */
+.timer_box {
+  width: 566px;
+  height: 330px;
+  position: relative;
+  border-radius: 17.713px;
+  background: rgba(255, 63, 63, 0.85);
+  overflow: hidden;
+  margin-bottom: 36px;
+  box-sizing: border-box;
+}
+
+.timer_mode_area {
+  width: 126px;
+  height: 30px;
+  padding-bottom: 6px;
+  margin-left: 11px;
+  margin-top: 8px;
+  box-sizing: border-box;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.full_screen_mode_btn {
+  position: absolute;
+  top: 13px;
+  right: 13px;
+}
+
+.timer_area {
+  color: white;
+  height: 270px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+.select_to-do {
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.timer {
+  font-size: 103px;
+  font-weight: 700;
+}
+
+.control_timer {
+  font-size: 32px;
+  font-weight: 700;
+}
+/* 할 일 목록 박스 CSS */
+.todo_list_box {
+  width: 566px;
+  height: 330px;
+  border-radius: 5px;
+  background-color: rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.title_area {
+  background-color: rgba(217, 217, 217, 0.34);
+  width: 100%;
+  height: 40px;
+
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add_list_btn {
+  position: absolute;
+  top: 10px;
+  right: 11px;
+}
+
+.list_area {
+  width: 100%;
+  height: 290px;
+  padding: 2% 0;
+  box-sizing: border-box;
+
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.list_area > div:not(:last-child) {
+  margin-bottom: 10px;
+}
+
+/* 타임라인 css */
+.focus_time_and_timeline_section {
+  width: 335px;
+  height: 700px;
+}
+
+.total_focus_time_box {
+  background-color: dodgerblue;
+  width: 100%;
+  height: 50px;
+  border-bottom: 1px solid;
+}
+
+.time_line_box {
+  background-color: white;
+  width: 100%;
+  height: 650px;
+  border-bottom: 1px solid;
+}
+
+/* 모달창 */
+.add_todo_box {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   width: 500px;
-  height: 500px;
-  background-color: red;
+  height: 300px;
+  background-color: white;
+  border: 1px solid;
+  border-radius: 5px;
+  z-index: 2;
+  display: none;
+}
+
+.edit_todo_box {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+  height: 300px;
+  background-color: white;
+  border: 1px solid;
+  border-radius: 5px;
+  z-index: 2;
+  display: none;
+}
+
+.edit_todo_box > input {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  width: 80%;
+  height: 30px;
+}
+
+.edit_todo_box > div > button:nth-child(2) {
+  margin-left: 5px;
+}
+.add_todo_box > input {
+  border-style: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  width: 80%;
+  height: 30px;
+}
+
+.add_todo_box > div > button:nth-child(2) {
+  margin-left: 5px;
 }
