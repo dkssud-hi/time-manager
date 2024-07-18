@@ -137,7 +137,7 @@
 }
 
 /* 모달창 */
-.add_todo_box {
+.modal_box {
   position: absolute;
   left: 50%;
   top: 50%;
@@ -145,42 +145,68 @@
   width: 500px;
   height: 300px;
   background-color: white;
-  border: 1px solid;
+  /* border: 1px solid; */
+  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2), 0 8px 20px rgba(0, 0, 0, 0.1);
   border-radius: 5px;
   z-index: 2;
   display: none;
 }
+.modal_inner_box {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.input_box {
+  width: 80%;
+  height: 30px;
+  border: none;
+  border-bottom: 1px solid black;
+  padding: 5px 0;
+  outline: none;
+  font-size: 15px;
+}
 
-.edit_todo_box {
+.button_box {
+  width: 100%;
+  height: 40px;
   position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 500px;
-  height: 300px;
+  bottom: 5%;
+}
+
+.button_inner_box {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+#delete_and_save_btns {
+  display: inline-block;
+  position: absolute;
+  width: 150px;
+  right: 10px;
+}
+
+.button_box button {
+  width: 70px;
+  height: 40px;
   background-color: white;
   border: 1px solid;
-  border-radius: 5px;
-  z-index: 2;
-  display: none;
+  border-radius: 2px;
 }
 
-.edit_todo_box > input {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-  width: 80%;
-  height: 30px;
+#close_btn {
+  margin-left: 7px;
 }
 
-.edit_todo_box > div > button:nth-child(2) {
-  margin-left: 5px;
-}
-.add_todo_box > input {
-  border-style: none;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-  width: 80%;
-  height: 30px;
-}
-
-.add_todo_box > div > button:nth-child(2) {
-  margin-left: 5px;
+#delete_btn {
+  position: absolute;
+  left: 5%;
+  border: none;
+  font-weight: 700;
+  width: 70px;
+  height: 40px;
 }

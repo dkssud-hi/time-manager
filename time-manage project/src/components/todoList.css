@@ -3,18 +3,43 @@
   height: 31px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: start;
   border-bottom: 0.5px solid rgba(0, 0, 0, 0.65);
+  transition: background-color 0.5s ease;
+  border-radius: 3px;
+}
+
+.todo_list:hover {
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 .check_box {
+  width: 5%;
+  height: 100%;
   margin-right: 2%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.list_box {
+  flex-grow: 1;
 }
 
 .list {
-  flex-grow: 1;
+  display: inline-block;
+  height: 100%; /* 높이 설정 */
+  position: relative;
 }
 
 .edit_btn {
   margin-left: 2%;
+}
+
+.line {
+  position: absolute;
+  top: 43%;
+  width: 99%;
+  height: 1.2px;
+  background-color: rgba(0, 0, 0, 0.2);
 }

@@ -18,6 +18,61 @@ function Home() {
   const inputTodoRef = useRef<HTMLInputElement>(null);
   const addNewTodoWindow = useRef<HTMLSectionElement>(null);
   const editTodoWindow = useRef<HTMLSectionElement>(null);
+  const testKeyDownRef = useRef<(event: KeyboardEvent) => void>();
+
+  testKeyDownRef.current = (event: KeyboardEvent) => {
+    //이렇게하면 기존 window객체에 바인딩 되어있는 Ref안의 이벤트핸들러를 최신화시켜서 최신화된 Todo를 바라보게 하는건가
+    const addNewTodoWindowDisplayStyle = window.getComputedStyle(
+      addNewTodoWindow.current
+    ).display;
+    const editTodoWindowDisplayStyle = window.getComputedStyle(
+      editTodoWindow.current
+    ).display;
+    if (event.key === "Enter" && addNewTodoWindowDisplayStyle === "block") {
+      addNewTodoList();
+    } else if (
+      event.key === "Enter" &&
+      editTodoWindowDisplayStyle === "block"
+    ) {
+      saveList();
+    }
+  };
+
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (addNewTodoWindow.current && editTodoWindow.current) {
+      const addNewTodoWindowDisplayStyle = window.getComputedStyle(
+        addNewTodoWindow.current
+      ).display;
+      const editTodoWindowDisplayStyle = window.getComputedStyle(
+        editTodoWindow.current
+      ).display;
+
+      if (addNewTodoWindowDisplayStyle === "block") {
+        if (event.key === "Escape") {
+          cancelAddNewTodo();
+        }
+      } else if (editTodoWindowDisplayStyle === "block") {
+        if (event.key === "Escape") {
+          cancelEditList();
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    const testHandleKeyDown = (event: KeyboardEvent) => {
+      if (testKeyDownRef.current) {
+        testKeyDownRef.current(event);
+      }
+    };
+
+    window.addEventListener("keydown", testHandleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keydown", testHandleKeyDown);
+    };
+  }, [Todo]);
 
   const changeToPomodoroMode = function (presentTimerMode: timerModeName) {
     if (presentTimerMode === POMODORO_MODE) {
@@ -47,7 +102,7 @@ function Home() {
   };
 
   //리스트 추가창 이벤트
-  const addNewTodoList = (event) => {
+  const addNewTodoList = () => {
     if (inputTodoRef.current!.value.length <= 0) {
       alert("할 일을 입력해주세요!");
       //한자라도 입력이 안되어있으면 버튼 비활성화로 변경
@@ -69,14 +124,16 @@ function Home() {
           setSelectListId={setSelectListId}
           controlEditWindow={editTodoWindow}
           controlInputTodo={inputEditTodo}
+          isComplete={false}
         />, //key값 교체 필요
       ]);
+
       inputTodoRef.current!.value = "";
       addNewTodoWindow.current!.style = "display:none";
     }
   };
 
-  const cancelAddNewTodo = (event) => {
+  const cancelAddNewTodo = () => {
     //input태그의 value 정리후 모달창 닫기.
     inputTodoRef.current!.value = "";
     addNewTodoWindow.current!.style = "display:none";
@@ -93,13 +150,14 @@ function Home() {
   };
   const saveList = () => {
     let index = -1;
+    console.log(Todo);
     for (let i = 0; i < Todo.length; i++) {
       if (Todo[i].props.listId === selectListId) {
         index = i;
         break;
       }
     }
-
+    console.log(index);
     const tempTodo = [...Todo];
     if (inputEditTodo.current.value) {
       tempTodo.splice(
@@ -112,6 +170,7 @@ function Home() {
           setSelectListId={setSelectListId}
           controlEditWindow={editTodoWindow}
           controlInputTodo={inputEditTodo}
+          isComplete={Todo[index].props.isComplete}
         />
       );
       setNewTodo(tempTodo);
@@ -126,29 +185,77 @@ function Home() {
     editTodoWindow.current.style = "display:none";
   };
 
+  //인풋박스 focus, blur 이벤트 함수
+
+  const handleFocus = (event) => {
+    event.target.style.borderBottom = "1px solid dodgerblue"; // 포커스 시 밑줄 색 변경
+  };
+
+  const handleBlur = (event) => {
+    event.target.style.borderBottom = "1px solid black"; // 포커스 해제 시 원래 색으로 변경
+  };
+
   return (
     <main className="timer_page">
-      <section className="add_todo_box" ref={addNewTodoWindow}>
-        <input
-          type="text"
-          placeholder="할 일을 입력해주세요"
-          ref={inputTodoRef}
-        ></input>
-        <div>
-          <button onClick={addNewTodoList}>추가</button>
-          <button onClick={cancelAddNewTodo}>닫기</button>
+      <section className="modal_box" ref={addNewTodoWindow}>
+        <div className="modal_inner_box">
+          <input
+            type="text"
+            placeholder="할 일을 입력해주세요"
+            ref={inputTodoRef}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            // onKeyDown={(e) => {
+            //   if (e.key === "Enter") {
+            //     addNewTodoList();
+            //   }
+            // }}
+            className="input_box"
+          />
+          <div className="button_box">
+            <div className="button_inner_box">
+              <div id="delete_and_save_btns">
+                <button onClick={addNewTodoList} id="add_btn">
+                  추가
+                </button>
+                <button onClick={cancelAddNewTodo} id="close_btn">
+                  닫기
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
-      <section className="edit_todo_box" ref={editTodoWindow}>
-        <input
-          type="text"
-          placeholder="할 일을 입력해주세요"
-          ref={inputEditTodo}
-        ></input>
-        <div>
-          <button onClick={deleteList}>삭제</button>
-          <button onClick={saveList}>저장</button>
-          <button onClick={cancelEditList}>닫기</button>
+      <section className="modal_box" ref={editTodoWindow}>
+        <div className="modal_inner_box">
+          <input
+            type="text"
+            placeholder="할 일을 입력해주세요"
+            ref={inputEditTodo}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            // onKeyDown={(e) => {
+            //   if (e.key === "Enter") {
+            //     saveList();
+            //   }
+            // }}
+            className="input_box"
+          />
+          <div className="button_box">
+            <div className="button_inner_box">
+              <button onClick={deleteList} id="delete_btn">
+                삭제
+              </button>
+              <div id="delete_and_save_btns">
+                <button onClick={saveList} onKeyDown={saveList} id="save_btn">
+                  저장
+                </button>
+                <button onClick={cancelEditList} id="close_btn">
+                  닫기
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
       <div className="timer_page_innerbox">
