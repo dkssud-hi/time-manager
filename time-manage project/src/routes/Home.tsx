@@ -20,6 +20,7 @@ function Home() {
   const editTodoWindow = useRef<HTMLSectionElement>(null);
   const testKeyDownRef = useRef<(event: KeyboardEvent) => void>();
 
+  // 키다운 이벤트 관련 코드
   testKeyDownRef.current = (event: KeyboardEvent) => {
     //이렇게하면 기존 window객체에 바인딩 되어있는 Ref안의 이벤트핸들러를 최신화시켜서 최신화된 Todo를 바라보게 하는건가
     const addNewTodoWindowDisplayStyle = window.getComputedStyle(
