@@ -5,6 +5,8 @@ import "./home.css";
 function Home() {
   const POMODORO_MODE = "pomodoro";
   const INFINITE_FOCUS_MODE = "infiniteFocus";
+  const WORK_DURATION = 5;
+  const BREAK_DURATION = 40;
   const now = new Date();
 
   type timerModeName = "pomodoro" | "infiniteFocus";
@@ -12,6 +14,9 @@ function Home() {
   const [timerMode, setTimerMode] = useState<timerModeName>("pomodoro");
   const [Todo, setNewTodo] = useState<React.ReactNode[]>([]);
   const [selectListId, setSelectListId] = useState<string | undefined>();
+  const [seconds, setSeconds] = useState<number>(WORK_DURATION);
+  const [isRunning, setIsRunning] = useState<boolean>(false);
+  const [isBreak, setIsBreak] = useState<boolean>(false);
   const pomodoroModeBtnRef = useRef(null);
   const infiniteFocusModeBtnRef = useRef(null);
   const inputEditTodo = useRef<HTMLInputElement>(null);
@@ -67,15 +72,40 @@ function Home() {
         testKeyDownRef.current(event);
       }
     };
-
     window.addEventListener("keydown", testHandleKeyDown);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keydown", testHandleKeyDown);
     };
-  }, [Todo]);
+  }, []);
 
-  const changeToPomodoroMode = function (presentTimerMode: timerModeName) {
+  //isRunning이 의존성 타이머시작 이벤트 클릭시 타이머 진행
+  useEffect(() => {
+    let timer;
+    if (isRunning) {
+      timer = setInterval(() => {
+        setSeconds((prevSecondsLeft) => {
+          if (prevSecondsLeft > 0) return prevSecondsLeft - 1;
+          //타이머가 끝나면 자동으로 상태변화시켜 휴식or집중 모드로 변환
+          setIsRunning(false);
+          setIsBreak((prev) => !prev);
+          return prevSecondsLeft;
+        });
+      }, 1000);
+    } else {
+      clearInterval(timer);
+    }
+    return () => clearInterval(timer);
+  }, [isRunning]);
+
+  useEffect(() => {
+    if (seconds === 0) {
+      setSeconds(isBreak ? BREAK_DURATION : WORK_DURATION);
+    }
+  }, [seconds, isBreak]);
+
+  //타이머 관련 코드
+  const changeToPomodoroMode = (presentTimerMode: timerModeName) => {
     if (presentTimerMode === POMODORO_MODE) {
       console.log("타이머 모드가 이미 포모도로 모드입니다.");
     } else {
@@ -86,7 +116,7 @@ function Home() {
     }
   };
 
-  const changeToInfiniteFocusMode = function (presentTimerMode: timerModeName) {
+  const changeToInfiniteFocusMode = (presentTimerMode: timerModeName) => {
     if (presentTimerMode === INFINITE_FOCUS_MODE) {
       console.log("타이머가 이미 무한집중 모드입니다.");
     } else {
@@ -97,12 +127,35 @@ function Home() {
     }
   };
 
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes < 10 ? "0" : ""}${minutes}:${
+      remainingSeconds < 10 ? "0" : ""
+    }${remainingSeconds}`;
+  };
+
+  const startPomodoroTimerEvent = () => {
+    //타이머 시작 이밴트 발생
+    setIsRunning(true);
+  };
+
+  const pausePomodoroTimerEvent = () => {
+    //타이머 정지 이벤트 발생
+    setIsRunning(false);
+  };
+
+  const endPomodoroTimerEvent = () => {
+    //타이머 종료 이벤트 발생
+    setIsRunning(false);
+  };
+
+  //리스트 추가창 이벤트
   const openAddTodoBox = function (): void {
     addNewTodoWindow.current!.style = "display:block";
     inputTodoRef.current.focus();
   };
 
-  //리스트 추가창 이벤트
   const addNewTodoList = () => {
     if (inputTodoRef.current!.value.length <= 0) {
       alert("할 일을 입력해주세요!");
@@ -294,8 +347,32 @@ function Home() {
             </div>
             <div className="timer_area">
               <div className="select_to-do">할 일</div>
-              <div className="timer">25 : 00</div>
-              <div className="control_timer">시작</div>
+              <div className="timer">{formatTime(seconds)}</div>
+              {isRunning ? (
+                <div className="control_timer_box">
+                  <button
+                    className="control_btn"
+                    onClick={pausePomodoroTimerEvent}
+                  >
+                    정 지
+                  </button>
+                  <button
+                    className="control_btn"
+                    onClick={endPomodoroTimerEvent}
+                  >
+                    종 료
+                  </button>
+                </div>
+              ) : (
+                <div className="control_timer_box">
+                  <button
+                    className="control_btn"
+                    onClick={startPomodoroTimerEvent}
+                  >
+                    시 작
+                  </button>
+                </div>
+              )}
             </div>
           </section>
           <section className="todo_list_box">

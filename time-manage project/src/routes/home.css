@@ -29,12 +29,14 @@
 }
 
 .timer_mode_area {
-  width: 126px;
+  width: 140px;
   height: 30px;
   padding-bottom: 6px;
   margin-left: 11px;
   margin-top: 8px;
   box-sizing: border-box;
+
+  font-weight: 600;
 
   display: flex;
   align-items: center;
@@ -49,6 +51,7 @@
 
 .timer_area {
   color: white;
+  width: 100%;
   height: 270px;
   display: flex;
   flex-direction: column;
@@ -58,17 +61,35 @@
 
 .select_to-do {
   font-size: 32px;
-  font-weight: 700;
 }
 
 .timer {
-  font-size: 103px;
-  font-weight: 700;
+  font-family: "Nanum", monospace;
+  font-style: normal;
+  font-size: 115px;
+  font-weight: 800;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.control_timer_box {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.control_timer {
-  font-size: 32px;
-  font-weight: 700;
+.control_btn {
+  width: 100px;
+  height: 40px;
+  font-size: 20px;
+  color: rgba(255, 63, 63, 0.85);
+  border: none;
+  border-radius: 5px;
+  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2), 0 8px 20px rgba(0, 0, 0, 0.1);
+  background-color: white;
+}
+.control_timer_box > .control_btn:nth-child(2) {
+  margin-left: 70px;
 }
 /* 할 일 목록 박스 CSS */
 .todo_list_box {

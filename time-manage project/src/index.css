@@ -1,0 +1,54 @@
+@font-face {
+  font-family: "Nanum";
+  src: url(./assets/fonts/NanumSquareRoundOTFEB.otf) format("opentype");
+  font-weight: 800;
+}
+
+@font-face {
+  font-family: "Nanum";
+  src: url(./assets/fonts/NanumSquareRoundOTFB.otf) format("opentype");
+  font-weight: 600;
+}
+
+@font-face {
+  font-family: "Nanum";
+  src: url(./assets/fonts/NanumSquareRoundOTFL.otf) format("opentype");
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "Nanum";
+  src: url(./assets/fonts/NanumSquareRoundOTFR.otf) format("opentype");
+  font-weight: 200;
+}
+
+/* non-squre */
+/* Heavy */
+@font-face {
+  font-family: "Nanum-angle";
+  src: url(./assets/fonts/non-squre/NanumSquareNeoTTF-eHv.woff);
+  font-weight: 1000;
+}
+/* Extrabold */
+@font-face {
+  font-family: "Nanum-angle";
+  src: url(./assets/fonts/non-squre/NanumSquareNeoTTF-dEb.woff);
+  font-weight: 800;
+}
+/* bold */
+@font-face {
+  font-family: "Nanum-angle";
+  src: url(./assets/fonts/non-squre/NanumSquareNeoTTF-cBd.woff);
+  font-weight: 600;
+}
+/* regular */
+@font-face {
+  font-family: "Nanum-angle";
+  src: url(./assets/fonts/non-squre/NanumSquareNeoTTF-bRg.woff);
+  font-weight: 400;
+}
+
+* {
+  font-family: "Nanum-angle";
+  font-weight: 800;
+}
