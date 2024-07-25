@@ -6,7 +6,7 @@
   justify-content: start;
   border-bottom: 0.5px solid rgba(0, 0, 0, 0.65);
   transition: background-color 0.5s ease;
-  border-radius: 3px;
+  border-radius: 0px;
   cursor: pointer;
 }
 
@@ -36,6 +36,7 @@
   display: inline-block;
   height: 100%; /* 높이 설정 */
   position: relative;
+  font-weight: 600;
 }
 
 .edit_btn {
