@@ -52,3 +52,13 @@
   font-family: "Nanum-angle";
   font-weight: 800;
 }
+
+button {
+  cursor: pointer;
+}
+
+div,
+section,
+button {
+  border-radius: 5px;
+}

@@ -28,20 +28,21 @@ const TodoList: React.FC<TodoListProps> = ({
   const clickEditBtn = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     e.stopPropagation();
     setSelectListId(listId);
-    controlInputTodo.current.value = newTodo;
+    controlInputTodo.current!.value = newTodo;
+
     if (controlEditWindow.current) {
-      controlEditWindow.current.style = "display : block";
-      controlInputTodo.current.focus();
+      controlEditWindow.current.style.display = "block";
+      controlInputTodo.current!.focus();
     }
   };
 
   const handleCheckbox = () => {
     if (isChecked === TODO_COMPLETE) {
       setIsChecked(TODO_NOT_COMPLETE);
-      todoListRef.current!.style = "color:black";
+      todoListRef.current!.style.color = "black";
     } else {
       setIsChecked(TODO_COMPLETE);
-      todoListRef.current!.style = "color:rgba(0,0,0,0.5)";
+      todoListRef.current!.style.color = "rgba(0,0,0,0.5)";
     }
   };
 

@@ -1,129 +1,155 @@
 import React, { useEffect, useRef, useState } from "react";
 import TodoList from "../components/TodoList";
+import TimeLineItem from "../components/TimeLineItem";
 import "./home.css";
 
 function Home() {
   const POMODORO_MODE = "pomodoro";
   const INFINITE_FOCUS_MODE = "infiniteFocus";
-  const WORK_DURATION = 5;
-  const BREAK_DURATION = 40;
+  const WORK_DURATION = 10;
+  const BREAK_DURATION = 5;
   const now = new Date();
 
   type timerModeName = "pomodoro" | "infiniteFocus";
 
   const [timerMode, setTimerMode] = useState<timerModeName>("pomodoro");
   const [Todo, setNewTodo] = useState<React.ReactNode[]>([]);
+  const [TimeLineItems, setTimeLineItems] = useState<React.ReactNode[]>([]);
   const [selectListId, setSelectListId] = useState<string | undefined>();
   const [seconds, setSeconds] = useState<number>(WORK_DURATION);
   const [isRunning, setIsRunning] = useState<boolean>(false);
-  const [isBreak, setIsBreak] = useState<boolean>(false);
-  const pomodoroModeBtnRef = useRef(null);
-  const infiniteFocusModeBtnRef = useRef(null);
+
+  const onFocusBtnRef = useRef<HTMLButtonElement>(null);
+  const onBreakBtnRef = useRef<HTMLButtonElement>(null);
+  const selectToDoRef = useRef<HTMLDivElement>(null);
+  const controlTimerBoxRef = useRef<HTMLDivElement>(null);
+  const timerBoxRef = useRef<HTMLDivElement>(null);
+  const startTimerBtnRef = useRef<HTMLButtonElement>(null);
+  const endTimerBtnRef = useRef<HTMLButtonElement>(null);
+  const workDurationRef = useRef<number>(WORK_DURATION);
+  const breakDurationRef = useRef<number>(BREAK_DURATION);
+  const editSettingTimeWindowRef = useRef<HTMLSectionElement>(null);
+  const minuitesInputRef = useRef<HTMLInputElement>(null);
+  const isBreakRef = useRef<boolean>(false);
+  const timerRef = useRef<NodeJS.Timer | null>(null);
+  const pomodoroModeBtnRef = useRef<HTMLDivElement>(null);
+  const infiniteFocusModeBtnRef = useRef<HTMLDivElement>(null);
   const inputEditTodo = useRef<HTMLInputElement>(null);
   const inputTodoRef = useRef<HTMLInputElement>(null);
   const addNewTodoWindow = useRef<HTMLSectionElement>(null);
   const editTodoWindow = useRef<HTMLSectionElement>(null);
-  const testKeyDownRef = useRef<(event: KeyboardEvent) => void>();
+
+  useEffect(() => {
+    timerStateChange();
+    setTimeLine();
+  }, []);
+
+  //isRunning이 의존성 타이머시작 이벤트 클릭시 타이머 진행
+  useEffect(() => {
+    if (isRunning) {
+      timerRef.current = setInterval(() => {
+        setSeconds((prevSecondsLeft) => {
+          return prevSecondsLeft - 1;
+        });
+      }, 1000);
+    }
+    //타이머 종료시 intervalId 해제
+    return () => clearInterval(timerRef.current);
+  }, [isRunning]);
+
+  useEffect(() => {
+    if (seconds === 0) {
+      setIsRunning(false);
+      isBreakRef.current = !isBreakRef.current;
+      setSeconds(
+        isBreakRef.current ? breakDurationRef.current : workDurationRef.current
+      );
+      timerStateChange();
+    }
+  }, [seconds]);
 
   // 키다운 이벤트 관련 코드
-  testKeyDownRef.current = (event: KeyboardEvent) => {
-    //이렇게하면 기존 window객체에 바인딩 되어있는 Ref안의 이벤트핸들러를 최신화시켜서 최신화된 Todo를 바라보게 하는건가
+  const keyDownEvent = (event: React.KeyboardEvent<HTMLInputElement>) => {
     const addNewTodoWindowDisplayStyle = window.getComputedStyle(
       addNewTodoWindow.current
     ).display;
     const editTodoWindowDisplayStyle = window.getComputedStyle(
       editTodoWindow.current
     ).display;
-    if (event.key === "Enter" && addNewTodoWindowDisplayStyle === "block") {
-      addNewTodoList();
-    } else if (
-      event.key === "Enter" &&
-      editTodoWindowDisplayStyle === "block"
-    ) {
-      saveList();
-    }
-  };
+    const editSettingTimeWindowDisplayStyle = window.getComputedStyle(
+      editSettingTimeWindowRef.current
+    ).display;
 
-  const handleKeyDown = (event: KeyboardEvent) => {
-    if (addNewTodoWindow.current && editTodoWindow.current) {
-      const addNewTodoWindowDisplayStyle = window.getComputedStyle(
-        addNewTodoWindow.current
-      ).display;
-      const editTodoWindowDisplayStyle = window.getComputedStyle(
-        editTodoWindow.current
-      ).display;
-
-      if (addNewTodoWindowDisplayStyle === "block") {
-        if (event.key === "Escape") {
-          cancelAddNewTodo();
-        }
-      } else if (editTodoWindowDisplayStyle === "block") {
-        if (event.key === "Escape") {
-          cancelEditList();
-        }
+    if (addNewTodoWindowDisplayStyle === "block") {
+      if (event.key === "Enter") {
+        addNewTodoList();
+      } else if (event.key === "Escape") {
+        cancelAddNewTodo();
+      }
+    } else if (editTodoWindowDisplayStyle === "block") {
+      if (event.key === "Enter") {
+        saveList();
+      } else if (event.key === "Escape") {
+        cancelEditList();
+      }
+    } else if (editSettingTimeWindowDisplayStyle === "block") {
+      if (event.key === "Enter") {
+        saveSettingTime();
+      } else if (event.key === "Escape") {
+        cancelSettingTime();
       }
     }
   };
+  //타임라인 관련 코드
+  const setTimeLine = () => {
+    const tempArr = new Array(25).fill(0);
+    const arr: React.ReactNode[] = [];
 
-  useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown);
-    const testHandleKeyDown = (event: KeyboardEvent) => {
-      if (testKeyDownRef.current) {
-        testKeyDownRef.current(event);
-      }
-    };
-    window.addEventListener("keydown", testHandleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keydown", testHandleKeyDown);
-    };
-  }, []);
-
-  //isRunning이 의존성 타이머시작 이벤트 클릭시 타이머 진행
-  useEffect(() => {
-    let timer;
-    if (isRunning) {
-      timer = setInterval(() => {
-        setSeconds((prevSecondsLeft) => {
-          if (prevSecondsLeft > 0) return prevSecondsLeft - 1;
-          //타이머가 끝나면 자동으로 상태변화시켜 휴식or집중 모드로 변환
-          setIsRunning(false);
-          setIsBreak((prev) => !prev);
-          return prevSecondsLeft;
-        });
-      }, 1000);
-    } else {
-      clearInterval(timer);
-    }
-    return () => clearInterval(timer);
-  }, [isRunning]);
-
-  useEffect(() => {
-    if (seconds === 0) {
-      setSeconds(isBreak ? BREAK_DURATION : WORK_DURATION);
-    }
-  }, [seconds, isBreak]);
-
+    tempArr.forEach((val, idx) => {
+      arr.push(<TimeLineItem time={idx} />);
+    });
+    setTimeLineItems(arr);
+  };
   //타이머 관련 코드
+  const timerStateChange = () => {
+    if (isBreakRef.current) {
+      onFocusBtnRef.current!.style.background = "rgba(50,50,50, 0)";
+      onBreakBtnRef.current!.style.background = "rgba(50,50,50, 0.34)";
+      timerBoxRef.current!.style.background = "rgba(30, 144, 255, 0.85)";
+      startTimerBtnRef.current!.style.color = "rgba(30, 144, 255, 0.85)";
+      endTimerBtnRef.current!.style.color = "rgba(30, 144, 255, 0.85)";
+      selectToDoRef.current!.style.visibility = "hidden";
+    } else {
+      onFocusBtnRef.current!.style.background = "rgba(50,50,50, 0.34)";
+      onBreakBtnRef.current!.style.background = "rgba(50,50,50, 0)";
+      timerBoxRef.current!.style.background = "rgba(255, 63, 63, 0.85)";
+      startTimerBtnRef.current!.style.color = "rgba(255, 63, 63, 0.85)";
+      endTimerBtnRef.current!.style.color = "rgba(255, 63, 63, 0.85)";
+      selectToDoRef.current!.style.visibility = "visible";
+    }
+  };
+  const timerStateOnFocus = () => {
+    isBreakRef.current = !isBreakRef.current;
+    setSeconds(
+      isBreakRef.current ? breakDurationRef.current : workDurationRef.current
+    );
+    timerStateChange();
+  };
+  const timerStateOnBreak = () => {
+    isBreakRef.current = !isBreakRef.current;
+    setSeconds(
+      isBreakRef.current ? breakDurationRef.current : workDurationRef.current
+    );
+    timerStateChange();
+  };
   const changeToPomodoroMode = (presentTimerMode: timerModeName) => {
     if (presentTimerMode === POMODORO_MODE) {
       console.log("타이머 모드가 이미 포모도로 모드입니다.");
     } else {
       setTimerMode(POMODORO_MODE);
-      pomodoroModeBtnRef.current!.style = "color:black";
-      infiniteFocusModeBtnRef.current!.style = "color:white";
+      pomodoroModeBtnRef.current!.style.color = "black";
+      infiniteFocusModeBtnRef.current!.style.color = "white";
       console.log("타이머 모드가 포모도로모드로 바뀌었습니다.");
-    }
-  };
-
-  const changeToInfiniteFocusMode = (presentTimerMode: timerModeName) => {
-    if (presentTimerMode === INFINITE_FOCUS_MODE) {
-      console.log("타이머가 이미 무한집중 모드입니다.");
-    } else {
-      setTimerMode(INFINITE_FOCUS_MODE);
-      pomodoroModeBtnRef.current!.style = "color:white";
-      infiniteFocusModeBtnRef.current!.style = "color:black";
-      console.log("타이머가 무한 집중모드로 바뀌었습니다.");
     }
   };
 
@@ -135,25 +161,58 @@ function Home() {
     }${remainingSeconds}`;
   };
 
-  const startPomodoroTimerEvent = () => {
-    //타이머 시작 이밴트 발생
-    setIsRunning(true);
-  };
-
-  const pausePomodoroTimerEvent = () => {
+  const startOrStopPomodoroTimerEvent = () => {
     //타이머 정지 이벤트 발생
-    setIsRunning(false);
+    setIsRunning((prev) => !prev);
   };
 
   const endPomodoroTimerEvent = () => {
     //타이머 종료 이벤트 발생
     setIsRunning(false);
+    //모달창으로 집중 or 휴식을 끝내겠냐는 알림 띄워주기(체크시 다시보지않음 포함)
+    isBreakRef.current = !isBreakRef.current;
+    setSeconds(
+      isBreakRef.current ? breakDurationRef.current : workDurationRef.current
+    );
+
+    //타이머 종료시 isBreakRef의 여부에 따라서 타이머의 테마 변경해주기.
+    timerStateChange();
+  };
+
+  //시간 설정 이벤트
+  const openEdtiSettingTimeBox = () => {
+    editSettingTimeWindowRef.current.style.display = "block";
+    minuitesInputRef.current!.focus();
+  };
+
+  const saveSettingTime = () => {
+    const editMinuites = Number(minuitesInputRef.current!.value);
+    if (editMinuites > 0) {
+      if (isBreakRef.current) {
+        breakDurationRef.current = editMinuites * 60;
+        setSeconds(breakDurationRef.current);
+      } else {
+        workDurationRef.current = editMinuites * 60;
+        setSeconds(workDurationRef.current);
+      }
+
+      minuitesInputRef.current!.value = "";
+      editSettingTimeWindowRef.current.style.display = "none";
+    } else {
+      alert("1 이상의 수를 입력해주세요!");
+      minuitesInputRef.current!.value = "";
+    }
+  };
+
+  const cancelSettingTime = () => {
+    minuitesInputRef.current!.value = "";
+    editSettingTimeWindowRef.current.style.display = "none";
   };
 
   //리스트 추가창 이벤트
   const openAddTodoBox = function (): void {
-    addNewTodoWindow.current!.style = "display:block";
-    inputTodoRef.current.focus();
+    addNewTodoWindow.current!.style.display = "block";
+    inputTodoRef.current!.focus();
   };
 
   const addNewTodoList = () => {
@@ -183,14 +242,14 @@ function Home() {
       ]);
 
       inputTodoRef.current!.value = "";
-      addNewTodoWindow.current!.style = "display:none";
+      addNewTodoWindow.current!.style.display = "none";
     }
   };
 
   const cancelAddNewTodo = () => {
     //input태그의 value 정리후 모달창 닫기.
     inputTodoRef.current!.value = "";
-    addNewTodoWindow.current!.style = "display:none";
+    addNewTodoWindow.current!.style.display = "none";
   };
 
   //리스트 편집창 이벤트
@@ -200,7 +259,7 @@ function Home() {
     );
     setNewTodo(reNewTodoList);
     inputEditTodo.current!.value = "";
-    editTodoWindow.current.style = "display:none";
+    editTodoWindow.current.style.display = "none";
   };
   const saveList = () => {
     let index = -1;
@@ -229,14 +288,14 @@ function Home() {
       );
       setNewTodo(tempTodo);
       inputEditTodo.current!.value = "";
-      editTodoWindow.current.style = "display:none";
+      editTodoWindow.current.style.display = "none";
     } else {
       alert("수정사항을 입력하세요.");
     }
   };
   const cancelEditList = () => {
     inputEditTodo.current!.value = "";
-    editTodoWindow.current.style = "display:none";
+    editTodoWindow.current.style.display = "none";
   };
 
   //인풋박스 focus, blur 이벤트 함수
@@ -252,6 +311,7 @@ function Home() {
   return (
     <main className="timer_page">
       <section className="modal_box" ref={addNewTodoWindow}>
+        <div className="modal_title">할일 목록 추가</div>
         <div className="modal_inner_box">
           <input
             type="text"
@@ -259,11 +319,7 @@ function Home() {
             ref={inputTodoRef}
             onFocus={handleFocus}
             onBlur={handleBlur}
-            // onKeyDown={(e) => {
-            //   if (e.key === "Enter") {
-            //     addNewTodoList();
-            //   }
-            // }}
+            onKeyDown={keyDownEvent}
             className="input_box"
           />
           <div className="button_box">
@@ -282,17 +338,14 @@ function Home() {
       </section>
       <section className="modal_box" ref={editTodoWindow}>
         <div className="modal_inner_box">
+          <div className="modal_title">할일 목록 편집</div>
           <input
             type="text"
             placeholder="할 일을 입력해주세요"
             ref={inputEditTodo}
             onFocus={handleFocus}
             onBlur={handleBlur}
-            // onKeyDown={(e) => {
-            //   if (e.key === "Enter") {
-            //     saveList();
-            //   }
-            // }}
+            onKeyDown={keyDownEvent}
             className="input_box"
           />
           <div className="button_box">
@@ -312,67 +365,85 @@ function Home() {
           </div>
         </div>
       </section>
+      <section className="modal_box" ref={editSettingTimeWindowRef}>
+        <div className="modal_inner_box">
+          <div className="modal_title">타이머 시간설정</div>
+          <input
+            type="number"
+            min="1"
+            ref={minuitesInputRef}
+            className="input_box"
+            id="minuites"
+            onKeyDown={keyDownEvent}
+          />
+          <div className="button_box">
+            <div className="button_inner_box">
+              <div id="delete_and_save_btns">
+                <button onClick={saveSettingTime} id="add_btn">
+                  저장
+                </button>
+                <button onClick={cancelSettingTime} id="close_btn">
+                  닫기
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
       <div className="timer_page_innerbox">
         <section className="timer_and_todo_section">
-          <section className="timer_box">
-            <div className="timer_mode_area">
+          <section className="timer_box" ref={timerBoxRef}>
+            <div className="timer_top_area">
               <div
+                className="timer_mode_area"
                 onClick={() => changeToPomodoroMode(timerMode)}
                 ref={pomodoroModeBtnRef}
               >
-                포모도로
-              </div>{" "}
-              |{" "}
-              <div
-                style={{ color: "white" }}
-                onClick={() => changeToInfiniteFocusMode(timerMode)}
-                ref={infiniteFocusModeBtnRef}
-              >
-                무한집중
+                모드변경
               </div>
-            </div>
-            <div className="full_screen_mode_btn">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="23"
-                height="23"
-                viewBox="0 0 23 23"
-                fill="none"
-              >
-                <path
-                  d="M0 0V12.0952L4.5357 7.5595L9.0714 12.0952L12.0952 9.0714L7.5595 4.5357L12.0952 0H0ZM15.119 12.0952L12.0952 15.119L16.6309 19.6547L12.0952 24.1904H24.1904V12.0952L19.6547 16.6309L15.119 12.0952Z"
-                  fill="#FAFAFA"
-                />
-              </svg>
+              <div className="state_btn_box">
+                <button
+                  className="state_btn"
+                  id="focus_btn"
+                  ref={onFocusBtnRef}
+                  onClick={timerStateOnFocus}
+                >
+                  집 중
+                </button>
+                <button
+                  className="state_btn"
+                  id="break_btn"
+                  ref={onBreakBtnRef}
+                  onClick={timerStateOnBreak}
+                >
+                  휴 식
+                </button>
+              </div>
+              <div className="full_screen_mode_btn">전체화면</div>
             </div>
             <div className="timer_area">
-              <div className="select_to-do">할 일</div>
-              <div className="timer">{formatTime(seconds)}</div>
-              {isRunning ? (
-                <div className="control_timer_box">
-                  <button
-                    className="control_btn"
-                    onClick={pausePomodoroTimerEvent}
-                  >
-                    정 지
-                  </button>
-                  <button
-                    className="control_btn"
-                    onClick={endPomodoroTimerEvent}
-                  >
-                    종 료
-                  </button>
-                </div>
-              ) : (
-                <div className="control_timer_box">
-                  <button
-                    className="control_btn"
-                    onClick={startPomodoroTimerEvent}
-                  >
-                    시 작
-                  </button>
-                </div>
-              )}
+              <div className="select_to-do" ref={selectToDoRef}>
+                할 일
+              </div>
+              <div className="timer" onClick={openEdtiSettingTimeBox}>
+                {formatTime(seconds)}
+              </div>
+              <div className="control_timer_box" ref={controlTimerBoxRef}>
+                <button
+                  className="control_btn"
+                  onClick={startOrStopPomodoroTimerEvent}
+                  ref={startTimerBtnRef}
+                >
+                  {isRunning ? "정 지" : "시 작"}
+                </button>
+                <button
+                  className="control_btn"
+                  onClick={endPomodoroTimerEvent}
+                  ref={endTimerBtnRef}
+                >
+                  종 료
+                </button>
+              </div>
             </div>
           </section>
           <section className="todo_list_box">
@@ -398,7 +469,9 @@ function Home() {
         </section>
         <section className="focus_time_and_timeline_section">
           <section className="total_focus_time_box">시간 영역</section>
-          <section className="time_line_box">타임라인 영역</section>
+          <section className="time_line_box">
+            <div className="time_line_inner_box">{TimeLineItems}</div>
+          </section>
         </section>
       </div>
     </main>

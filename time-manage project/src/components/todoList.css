@@ -7,10 +7,11 @@
   border-bottom: 0.5px solid rgba(0, 0, 0, 0.65);
   transition: background-color 0.5s ease;
   border-radius: 3px;
+  cursor: pointer;
 }
 
 .todo_list:hover {
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: rgba(210, 210, 210, 0.4);
 }
 
 .check_box {
@@ -20,6 +21,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.check_box > input {
+  width: 16px;
+  height: 16px;
 }
 
 .list_box {

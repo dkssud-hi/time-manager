@@ -26,27 +26,60 @@
   overflow: hidden;
   margin-bottom: 36px;
   box-sizing: border-box;
+  transition: all 0.5s ease;
+}
+
+.timer_top_area {
+  width: 100%;
+  height: 35px;
+  margin-top: 5px;
+  position: relative;
 }
 
 .timer_mode_area {
-  width: 140px;
-  height: 30px;
-  padding-bottom: 6px;
-  margin-left: 11px;
-  margin-top: 8px;
-  box-sizing: border-box;
+  color: white;
+  font-weight: 800;
+  position: absolute;
+  left: 3%;
+  top: 50%;
+  transform: translate(0, -50%);
+}
 
-  font-weight: 600;
+.state_btn_box {
+  height: 38px;
+  width: 120px;
+  position: absolute;
+  left: 50%;
+  top: 60%;
+  padding: 5px 0;
+  box-sizing: border-box;
+  transform: translate(-50%, -50%);
+  background-color: rgba(210, 210, 210, 0.3);
 
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-around;
+}
+
+.state_btn {
+  border: none;
+  color: white;
+  font-size: 15px;
+  font-weight: 800;
+  text-align: center;
+  width: 50px;
+  height: 28px;
+  transition: all 0.3s ease-in;
+  cursor: pointer;
 }
 
 .full_screen_mode_btn {
+  color: white;
+  font-weight: 800;
   position: absolute;
-  top: 13px;
-  right: 13px;
+  right: 3%;
+  top: 50%;
+  transform: translate(0, -50%);
 }
 
 .timer_area {
@@ -84,9 +117,13 @@
   font-size: 20px;
   color: rgba(255, 63, 63, 0.85);
   border: none;
-  border-radius: 5px;
   box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2), 0 8px 20px rgba(0, 0, 0, 0.1);
   background-color: white;
+  transition: all 0.3s ease;
+}
+
+.control_btn:hover {
+  background-color: rgba(210, 210, 210, 1);
 }
 .control_timer_box > .control_btn:nth-child(2) {
   margin-left: 70px;
@@ -95,7 +132,6 @@
 .todo_list_box {
   width: 566px;
   height: 330px;
-  border-radius: 5px;
   background-color: rgba(0, 0, 0, 0.04);
   overflow: hidden;
 
@@ -119,6 +155,7 @@
   position: absolute;
   top: 10px;
   right: 11px;
+  cursor: pointer;
 }
 
 .list_area {
@@ -141,20 +178,34 @@
 .focus_time_and_timeline_section {
   width: 335px;
   height: 700px;
+  border-radius: 0;
 }
 
 .total_focus_time_box {
+  box-sizing: border-box;
   background-color: dodgerblue;
   width: 100%;
   height: 50px;
-  border-bottom: 1px solid;
+  margin-bottom: 10px;
 }
 
 .time_line_box {
+  border-radius: 0;
   background-color: white;
   width: 100%;
   height: 650px;
-  border-bottom: 1px solid;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+}
+
+.time_line_inner_box {
+  border-radius: 0;
+  border-left: 1px solid black;
+  width: 90%;
+  margin-top: 15px;
 }
 
 /* 모달창 */
@@ -166,10 +217,9 @@
   width: 500px;
   height: 300px;
   background-color: white;
-  /* border: 1px solid; */
   box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2), 0 8px 20px rgba(0, 0, 0, 0.1);
-  border-radius: 5px;
   z-index: 2;
+  overflow: hidden;
   display: none;
 }
 .modal_inner_box {
@@ -181,6 +231,20 @@
   justify-content: center;
   align-items: center;
 }
+
+.modal_title {
+  position: absolute;
+  height: 20%;
+  width: 100%;
+  font-size: large;
+  box-sizing: border-box;
+  padding-left: 5%;
+  display: flex;
+  align-items: center;
+  background-color: beige;
+  top: 0;
+}
+
 .input_box {
   width: 80%;
   height: 30px;
@@ -189,6 +253,12 @@
   padding: 5px 0;
   outline: none;
   font-size: 15px;
+}
+
+.input_box#minuites {
+  border-bottom: none;
+  background-color: beige;
+  width: 15%;
 }
 
 .button_box {
@@ -216,7 +286,6 @@
   height: 40px;
   background-color: white;
   border: 1px solid;
-  border-radius: 2px;
 }
 
 #close_btn {
@@ -230,4 +299,9 @@
   font-weight: 700;
   width: 70px;
   height: 40px;
+  transition: all 0.5s ease;
+}
+
+#delete_btn:hover {
+  background-color: rgba(210, 210, 210, 0.3);
 }
