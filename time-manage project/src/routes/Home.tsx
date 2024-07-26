@@ -8,9 +8,11 @@ function Home() {
   const INFINITE_FOCUS_MODE = "infiniteFocus";
   const WORK_DURATION = 10;
   const BREAK_DURATION = 5;
+  const RECORD_INTERVAL = 5 * 60 * 1000;
   const now = new Date();
 
   type timerModeName = "pomodoro" | "infiniteFocus";
+  type intervalID = number;
 
   const [timerMode, setTimerMode] = useState<timerModeName>("pomodoro");
   const [Todo, setNewTodo] = useState<React.ReactNode[]>([]);
@@ -18,6 +20,11 @@ function Home() {
   const [selectListId, setSelectListId] = useState<string | undefined>();
   const [seconds, setSeconds] = useState<number>(WORK_DURATION);
   const [isRunning, setIsRunning] = useState<boolean>(false);
+
+  const startHourRef = useRef<number>();
+  const startMinuitesRef = useRef<number>();
+  const latestRef = useRef<Date>();
+  const recordWorkDurationRef = useRef<intervalID>();
 
   const onFocusBtnRef = useRef<HTMLButtonElement>(null);
   const onBreakBtnRef = useRef<HTMLButtonElement>(null);
@@ -31,7 +38,7 @@ function Home() {
   const editSettingTimeWindowRef = useRef<HTMLSectionElement>(null);
   const minuitesInputRef = useRef<HTMLInputElement>(null);
   const isBreakRef = useRef<boolean>(false);
-  const timerRef = useRef<NodeJS.Timer | null>(null);
+  const timerRef = useRef<intervalID>();
   const pomodoroModeBtnRef = useRef<HTMLDivElement>(null);
   const infiniteFocusModeBtnRef = useRef<HTMLDivElement>(null);
   const inputEditTodo = useRef<HTMLInputElement>(null);
@@ -52,9 +59,17 @@ function Home() {
           return prevSecondsLeft - 1;
         });
       }, 1000);
+
+      recordWorkDurationRef.current = setInterval(() => {
+        latestRef.current = new Date();
+      }, RECORD_INTERVAL);
     }
+
     //타이머 종료시 intervalId 해제
-    return () => clearInterval(timerRef.current);
+    return () => {
+      clearInterval(timerRef.current);
+      clearInterval(recordWorkDurationRef.current);
+    };
   }, [isRunning]);
 
   useEffect(() => {
@@ -110,6 +125,7 @@ function Home() {
     });
     setTimeLineItems(arr);
   };
+
   //타이머 관련 코드
   const timerStateChange = () => {
     if (isBreakRef.current) {
@@ -162,7 +178,9 @@ function Home() {
   };
 
   const startOrStopPomodoroTimerEvent = () => {
-    //타이머 정지 이벤트 발생
+    const now = new Date();
+    startHourRef.current = now.getHours();
+    startMinuitesRef.current = now.getMinutes();
     setIsRunning((prev) => !prev);
   };
 
