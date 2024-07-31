@@ -8,7 +8,7 @@ function Home() {
   const INFINITE_FOCUS_MODE = "infiniteFocus";
   const WORK_DURATION = 10;
   const BREAK_DURATION = 5;
-  const RECORD_INTERVAL = 5 * 60 * 1000;
+  const RECORD_INTERVAL = 5 * 60 * 1000; //5분
   const now = new Date();
 
   type timerModeName = "pomodoro" | "infiniteFocus";
@@ -20,10 +20,11 @@ function Home() {
   const [selectListId, setSelectListId] = useState<string | undefined>();
   const [seconds, setSeconds] = useState<number>(WORK_DURATION);
   const [isRunning, setIsRunning] = useState<boolean>(false);
+  const [latestTime, setLatestTime] = useState<number>(10);
 
   const startHourRef = useRef<number>();
   const startMinuitesRef = useRef<number>();
-  const latestRef = useRef<Date>();
+  const latestRef = useRef<null | Date>(null);
   const recordWorkDurationRef = useRef<intervalID>();
 
   const onFocusBtnRef = useRef<HTMLButtonElement>(null);
@@ -60,15 +61,24 @@ function Home() {
         });
       }, 1000);
 
-      recordWorkDurationRef.current = setInterval(() => {
-        latestRef.current = new Date();
-      }, RECORD_INTERVAL);
+      //5분 간격으로 총 집중시간 업데이트.
+      if (!isBreakRef.current) {
+        recordWorkDurationRef.current = setInterval(() => {
+          //5분 간격으로 현재 시간 latestRef에 저장
+          setLatestTime((prev) => prev - 1);
+        }, 3000);
+      }
     }
 
-    //타이머 종료시 intervalId 해제
+    //타이머 종료/정지시 intervalId 해제
     return () => {
       clearInterval(timerRef.current);
-      clearInterval(recordWorkDurationRef.current);
+      if (isBreakRef.current) {
+        clearInterval(recordWorkDurationRef.current);
+
+        //타이머 종료,정지 시점의 시간 저장
+        latestRef.current = new Date();
+      }
     };
   }, [isRunning]);
 
@@ -121,7 +131,7 @@ function Home() {
     const arr: React.ReactNode[] = [];
 
     tempArr.forEach((val, idx) => {
-      arr.push(<TimeLineItem time={idx} />);
+      arr.push(<TimeLineItem key={idx} time={idx} latestTime={latestTime} />);
     });
     setTimeLineItems(arr);
   };
