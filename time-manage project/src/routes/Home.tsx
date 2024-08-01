@@ -20,7 +20,7 @@ function Home() {
   const [selectListId, setSelectListId] = useState<string | undefined>();
   const [seconds, setSeconds] = useState<number>(WORK_DURATION);
   const [isRunning, setIsRunning] = useState<boolean>(false);
-  const [latestTime, setLatestTime] = useState<number>(10);
+  const [latestTime, setLatestTime] = useState<null | Date>(null);
 
   const startHourRef = useRef<number>();
   const startMinuitesRef = useRef<number>();
@@ -65,7 +65,8 @@ function Home() {
       if (!isBreakRef.current) {
         recordWorkDurationRef.current = setInterval(() => {
           //5분 간격으로 현재 시간 latestRef에 저장
-          setLatestTime((prev) => prev - 1);
+          const now = new Date();
+          setLatestTime(now);
         }, 3000);
       }
     }
@@ -75,12 +76,17 @@ function Home() {
       clearInterval(timerRef.current);
       if (isBreakRef.current) {
         clearInterval(recordWorkDurationRef.current);
-
         //타이머 종료,정지 시점의 시간 저장
-        latestRef.current = new Date();
+        const now = new Date();
+        setLatestTime(now);
       }
     };
   }, [isRunning]);
+
+  //집중시간 업데이트마다 타임라인컴포넌트 업데이트
+  useEffect(() => {
+    setTimeLine();
+  }, [latestTime]);
 
   useEffect(() => {
     if (seconds === 0) {
@@ -125,6 +131,7 @@ function Home() {
       }
     }
   };
+
   //타임라인 관련 코드
   const setTimeLine = () => {
     const tempArr = new Array(25).fill(0);
@@ -133,6 +140,7 @@ function Home() {
     tempArr.forEach((val, idx) => {
       arr.push(<TimeLineItem key={idx} time={idx} latestTime={latestTime} />);
     });
+
     setTimeLineItems(arr);
   };
 
